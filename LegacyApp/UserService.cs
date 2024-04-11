@@ -1,4 +1,5 @@
 ﻿using System;
+using LegacyApp.Core;
 using LegacyApp.Core.Validators;
 using LegacyApp.Core.Validators.Users;
 
@@ -8,12 +9,20 @@ namespace LegacyApp
     {
         private IInputValidator _inputValidator;
         private IClientRepository _clientRepository;
+        private ICreditLimitService _creditLimitService;
+        private UserDataAccessAdapter _UserDataAccessAdapter;
 
+        
+        //Adding to remove/fix that code for example after 2 releases 
+        [Obsolete]
         public UserService()
-        {
+         {
+             
             _inputValidator = new InputValidator();
             _clientRepository = new ClientRepository();
-        }
+            _creditLimitService = new UserCreditService();
+            _UserDataAccessAdapter = new UserDataAccessAdapter();
+         }
         
         //SRP
         //Extract validation
@@ -35,7 +44,6 @@ namespace LegacyApp
             }
 
             //DIP
-            // var clientRepository = new ClientRepository();
             var client = _clientRepository.GetById(clientId);
 
             var user = new User
@@ -47,36 +55,28 @@ namespace LegacyApp
                 LastName = lastName
             };
             
-            //  EXTRACT TYPES
             if (client.Type == "VeryImportantClient")
             {
                 user.HasCreditLimit = false;
             }
             else if (client.Type == "ImportantClient")
             {
-                using (var userCreditService = new UserCreditService())
-                {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                    int creditLimit = _creditLimitService.GetCreditLimit(user.LastName, user.DateOfBirth);
                     creditLimit = creditLimit * 2;
                     user.CreditLimit = creditLimit;
-                }
             }
             else
             {
                 user.HasCreditLimit = true;
-                using (var userCreditService = new UserCreditService())
-                {
-                    int creditLimit = userCreditService.GetCreditLimit(user.LastName, user.DateOfBirth);
+                    int creditLimit = _creditLimitService.GetCreditLimit(user.LastName, user.DateOfBirth);
                     user.CreditLimit = creditLimit;
-                }
             }
 
             if (user.HasCreditLimit && user.CreditLimit < 500)
             {
                 return false;
             }
-
-            UserDataAccess.AddUser(user);
+            _UserDataAccessAdapter.AddUser(user);
             return true;
         }
     }

@@ -42,6 +42,20 @@ public class UserServiceTests
             _ = service.AddUser("John", "Andrzejewicz", "andrzejewicz@wp.pl", new DateTime(1980, 1, 1), 6);
         });
     }
-    
+
+    [Fact]
+    public void AddUser_Should_Return_False_When_Email_Without_At_And_Dot()
+    {
+        String firstName = "John";
+        String lastName = "Doe";
+        DateTime birthDate = new DateTime(1980, 1, 1);
+        int clientId = 1;
+        String email = "Doe";
+        var service = new UserService();
+
+        bool result = service.AddUser(firstName, lastName, email, birthDate, clientId);
+        
+        Assert.False(result);
+    }
     
 }
