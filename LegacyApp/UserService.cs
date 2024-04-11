@@ -2,6 +2,7 @@
 using LegacyApp.Core;
 using LegacyApp.Core.Validators;
 using LegacyApp.Core.Validators.Users;
+using LegacyApp.Factory;
 
 namespace LegacyApp
 {
@@ -10,7 +11,8 @@ namespace LegacyApp
         private IInputValidator _inputValidator;
         private IClientRepository _clientRepository;
         private ICreditLimitService _creditLimitService;
-        private UserDataAccessAdapter _UserDataAccessAdapter;
+        private IUserDataAccessAdapter _UserDataAccessAdapter;
+        
 
         
         //Adding to remove/fix that code for example after 2 releases 
@@ -46,6 +48,7 @@ namespace LegacyApp
             //DIP
             var client = _clientRepository.GetById(clientId);
 
+            //TODO implement factory
             var user = new User
             {
                 Client = client,
