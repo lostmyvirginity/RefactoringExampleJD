@@ -3,16 +3,17 @@ using LegacyApp.Core.Validators;
 
 namespace LegacyApp.Factory;
 
-public class NormalUserFactory : IUserFactory
+public class ImportantUserFactory : IUserFactory
 {
     private ICreditLimitService _creditLimitService;
-    public NormalUserFactory(ICreditLimitService creditLimitService)
+    public ImportantUserFactory(ICreditLimitService creditLimitService)
     {
         _creditLimitService = creditLimitService;
     }
-    public User CreateUser(Client client, DateTime dateOfBirth, string email, string firstName, string lastName)
+    public User CreateUser(Client client, DateTime dateOfBirth, string email, string firstName, string lastName) 
     {
         int creditLimit = _creditLimitService.GetCreditLimit(lastName, dateOfBirth);
+        creditLimit = creditLimit * 2;
         return new User
         {
             Client = client,
@@ -20,8 +21,8 @@ public class NormalUserFactory : IUserFactory
             EmailAddress = email,
             FirstName = firstName,
             LastName = lastName,
-            HasCreditLimit = true,
             CreditLimit = creditLimit
         };
+        
     }
 }

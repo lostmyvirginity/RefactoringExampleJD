@@ -5,5 +5,5 @@ namespace LegacyApp.Factory;
 
 public interface IUserFactory
 {
-    public User CreateUser(string client, DateTime dateOfBirth, string email, string firstName, string lastName);
+    public User CreateUser(Client client, DateTime dateOfBirth, string email, string firstName, string lastName);
 }

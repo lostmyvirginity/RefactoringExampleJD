@@ -2,16 +2,28 @@
 using LegacyApp.Core;
 using LegacyApp.Core.Validators;
 using LegacyApp.Core.Validators.Users;
-using LegacyApp.Factory;
+
 
 namespace LegacyApp
 {
     public class UserService
     {
+        public UserService(IInputValidator inputValidator, IClientRepository clientRepository, ICreditLimitService creditLimitService, IUserDataAccessAdapter userDataAccessAdapter, UserFactoryValidator userFactoryValidator, IUserValidator userValidator)
+        {
+            _inputValidator = inputValidator;
+            _clientRepository = clientRepository;
+            _creditLimitService = creditLimitService;
+            _userDataAccessAdapter = userDataAccessAdapter;
+            _userFactoryValidator = userFactoryValidator;
+            _userValidator = userValidator;
+        }
+
         private IInputValidator _inputValidator;
         private IClientRepository _clientRepository;
         private ICreditLimitService _creditLimitService;
-        private IUserDataAccessAdapter _UserDataAccessAdapter;
+        private IUserDataAccessAdapter _userDataAccessAdapter;
+        private UserFactoryValidator _userFactoryValidator;
+        private IUserValidator _userValidator;
         
 
         
@@ -23,7 +35,9 @@ namespace LegacyApp
             _inputValidator = new InputValidator();
             _clientRepository = new ClientRepository();
             _creditLimitService = new UserCreditService();
-            _UserDataAccessAdapter = new UserDataAccessAdapter();
+            _userDataAccessAdapter = new UserDataAccessAdapter();
+            _userFactoryValidator = new UserFactoryValidator();
+            _userValidator = new UserValidator();
          }
         
         //SRP
@@ -47,39 +61,17 @@ namespace LegacyApp
 
             //DIP
             var client = _clientRepository.GetById(clientId);
-
-            //TODO implement factory
-            var user = new User
-            {
-                Client = client,
-                DateOfBirth = dateOfBirth,
-                EmailAddress = email,
-                FirstName = firstName,
-                LastName = lastName
-            };
             
-            if (client.Type == "VeryImportantClient")
-            {
-                user.HasCreditLimit = false;
-            }
-            else if (client.Type == "ImportantClient")
-            {
-                    int creditLimit = _creditLimitService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    creditLimit = creditLimit * 2;
-                    user.CreditLimit = creditLimit;
-            }
-            else
-            {
-                user.HasCreditLimit = true;
-                    int creditLimit = _creditLimitService.GetCreditLimit(user.LastName, user.DateOfBirth);
-                    user.CreditLimit = creditLimit;
-            }
 
-            if (user.HasCreditLimit && user.CreditLimit < 500)
+            var user = _userFactoryValidator.GetUserFactoryByClientType(client.Type, _creditLimitService).CreateUser(client, dateOfBirth, email, firstName, lastName);
+
+            if (!_userValidator.validateUserCredits(user))
             {
                 return false;
             }
-            _UserDataAccessAdapter.AddUser(user);
+
+            _userDataAccessAdapter.AddUser(user);
+            
             return true;
         }
     }

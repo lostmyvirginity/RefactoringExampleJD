@@ -1,4 +1,6 @@
 using LegacyApp;
+using LegacyApp.Core;
+using LegacyApp.Core.Validators.Users;
 
 namespace UnitTest;
 
