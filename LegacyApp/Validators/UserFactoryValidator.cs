@@ -6,15 +6,11 @@ public class UserFactoryValidator
 {
     public IUserFactory GetUserFactoryByClientType(string clientType, ICreditLimitService creditLimitService)
     {
-        switch (clientType)
+        return clientType switch
         {
-            case "VeryImportantClient":
-                return new VeryImportantUserFactory();
-            case "ImportantClient":
-                return new ImportantUserFactory(creditLimitService);
-            default:
-                return new NormalUserFactory(creditLimitService);
-        }
-        
+            "VeryImportantClient" => new VeryImportantUserFactory(),
+            "ImportantClient" => new ImportantUserFactory(creditLimitService),
+            _ => new NormalUserFactory(creditLimitService)
+        };
     }
 }
